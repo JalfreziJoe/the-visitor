@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import classes from "./NavLinks.module.css";
 
-const NavLinks = (props) => {
+const NavLinks = props => {
   return (
     <ul className={classes["nav-links"]}>
       <li>
@@ -18,7 +18,7 @@ const NavLinks = (props) => {
         <NavLink to="/places/new">Add a place</NavLink>
       </li>
       <li>
-        <NavLink to="/auth">Authenticate</NavLink>
+        <NavLink to="/auth">Login / Sign-up</NavLink>
       </li>
     </ul>
   );
