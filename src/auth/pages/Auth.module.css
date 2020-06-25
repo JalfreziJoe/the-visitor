@@ -1,0 +1,22 @@
+.auth-page {
+  text-align: center;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 0;
+}
+
+.form-box {
+  display: inline-block;
+  max-width: 40rem;
+  margin-left: 0;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .form-box {
+    display: inline-block;
+    max-width: 30rem;
+    margin-left: 1rem;
+    margin-bottom: 0;
+  }
+}

@@ -51,7 +51,7 @@ const Input = props => {
   };
 
   const ele =
-    props.type === "input" ? (
+    props.type === "input" || props.type === "password" ? (
       <input
         id={props.id}
         type={props.type}
