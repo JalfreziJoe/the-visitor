@@ -1,43 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 
-import { useParams } from "react-router-dom";
-import PlaceList from "../components/PlaceList";
-
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Big Ben",
-    description:
-      "Big Ben is the nickname for the Great Bell of the striking clock at the north end of the Palace of Westminster in London and is usually extended to refer to both the clock and the clock tower. ",
-    imageUrl:
-      "https://cdn.londonandpartners.com/visit/london-organisations/big-ben/100225-640x360-elisabeth-tower-clock-face-640.jpg",
-    address: "Westminster, London SW1A 0AA",
-    location: {
-      lat: "51.5007292",
-      lon: "-0.1268141",
-    },
-    creator: "u2",
-  },
-  {
-    id: "p2",
-    title: "Big Ben",
-    description:
-      "Big Ben is the nickname for the Great Bell of the striking clock at the north end of the Palace of Westminster in London and is usually extended to refer to both the clock and the clock tower. ",
-    imageUrl:
-      "https://cdn.londonandpartners.com/visit/london-organisations/big-ben/100225-640x360-elisabeth-tower-clock-face-640.jpg",
-    address: "Westminster, London SW1A 0AA",
-    location: {
-      lat: "51.5007292",
-      lon: "-0.1268141",
-    },
-    creator: "u1",
-  },
-];
+import { useParams } from 'react-router-dom';
+import { useHttpClient } from '../../shared/hooks/http-hook';
+import PlaceList from '../components/PlaceList';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 
 const UserPlaces = () => {
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlaces, setLoadedPlaces] = useState();
   const userId = useParams().userId;
-  const userPlaces = DUMMY_PLACES.filter(place => place.creator === userId);
-  return <PlaceList items={userPlaces} />;
+  useEffect(() => {
+    try {
+      console.log('[userId] ' + userId);
+      const fetchRequest = async () => {
+        const resData = await sendRequest(
+          `${process.env.REACT_APP_REST_URL}/places/user/${userId}`
+        );
+        setLoadedPlaces(resData.places);
+      };
+      fetchRequest();
+    } catch (err) {}
+  }, [sendRequest, userId]);
+
+  const onDeleteHandler = deletedPlaceId => {
+    setLoadedPlaces(prevPlaces =>
+      prevPlaces.filter(place => place.id !== deletedPlaceId)
+    );
+  };
+
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && <LoadingSpinner asOverlay />}
+      {!isLoading && loadedPlaces && (
+        <PlaceList items={loadedPlaces} onDelete={onDeleteHandler} />
+      )}
+    </React.Fragment>
+  );
 };
 
 export default UserPlaces;

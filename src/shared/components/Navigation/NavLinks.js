@@ -1,16 +1,16 @@
-import React, { useContext } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useContext } from 'react';
+import { NavLink } from 'react-router-dom';
 
-import { AuthContext } from "../../context/auth-context";
-import Button from "../../../shared/components/FormElements/Button/Button";
+import { AuthContext } from '../../context/auth-context';
+import Button from '../../../shared/components/FormElements/Button/Button';
 
-import classes from "./NavLinks.module.css";
+import classes from './NavLinks.module.css';
 
 const NavLinks = props => {
   const auth = useContext(AuthContext);
 
   return (
-    <ul className={classes["nav-links"]}>
+    <ul className={classes['nav-links']}>
       <li>
         <NavLink to="/" exact>
           All users
@@ -18,7 +18,7 @@ const NavLinks = props => {
       </li>
       {auth.isLoggedIn && (
         <li>
-          <NavLink to="/u1/places">My places</NavLink>
+          <NavLink to={`/${auth.userId}/places`}>My places</NavLink>
         </li>
       )}
       {auth.isLoggedIn && (

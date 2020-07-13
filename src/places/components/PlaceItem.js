@@ -1,14 +1,19 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext } from 'react';
 
-import { AuthContext } from "../../shared/context/auth-context";
-import Card from "../../shared/components/UIElements/Card";
-import Button from "../../shared/components/FormElements/Button/Button";
-import Modal from "../../shared/components/UIElements/Modal";
-import Map from "../../shared/components/UIElements/Map";
-import classes from "./PlaceItem.module.css";
+import { useHttpClient } from '../../shared/hooks/http-hook';
+
+import { AuthContext } from '../../shared/context/auth-context';
+import Card from '../../shared/components/UIElements/Card';
+import Button from '../../shared/components/FormElements/Button/Button';
+import Modal from '../../shared/components/UIElements/Modal';
+import Map from '../../shared/components/UIElements/Map';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
+import classes from './PlaceItem.module.css';
 
 const PlaceItem = props => {
   const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [mapSwitch, setMapSwitch] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -27,29 +32,41 @@ const PlaceItem = props => {
     setShowDeleteModal(false);
   };
 
-  const confirmDeleteHandler = () => {
+  const confirmDeleteHandler = async () => {
     setShowDeleteModal(false);
-    console.log("Delete confirmed");
+    try {
+      await sendRequest(
+        `${process.env.REACT_APP_REST_URL}/places/${props.id}`,
+        'DELETE',
+        null,
+        {
+          Authorization: 'Bearer ' + auth.token,
+        }
+      );
+      props.onDelete(props.id);
+    } catch (err) {}
+    console.log('Delete confirmed');
   };
 
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
-        contentClass={classes["place-item__modal-content"]}
-        footerClass={classes["place-item__modal-actions"]}
+        contentClass={classes['place-item__modal-content']}
+        footerClass={classes['place-item__modal-actions']}
         header={props.address}
         cancel={closeMapHandler}
         footerContent={<Button onClick={closeMapHandler}>Close</Button>}
         show={mapSwitch}
       >
-        <div className={classes["map-container"]}>
+        <div className={classes['map-container']}>
           <Map center={props.coordinates} zoom={16} />
         </div>
       </Modal>
       <Modal
         header="Are you sure"
         show={showDeleteModal}
-        footerClass={classes["place-item__modal-actions"]}
+        footerClass={classes['place-item__modal-actions']}
         footerContent={
           <React.Fragment>
             <Button inverse onClick={cancelDeleteModalHandler}>
@@ -63,24 +80,28 @@ const PlaceItem = props => {
       >
         <p>Do you really want to delete this place?</p>
       </Modal>
-      <li className={classes["place-item"]}>
-        <Card className={classes["place-item__content"]}>
-          <div className={classes["place-item__image"]}>
-            <img src={props.image} alt={props.title} />
+      <li className={classes['place-item']}>
+        <Card className={classes['place-item__content']}>
+          {isLoading && <LoadingSpinner asOverlay />}
+          <div className={classes['place-item__image']}>
+            <img
+              src={`${process.env.REACT_APP_ASSET_URL}${props.image}`}
+              alt={props.title}
+            />
           </div>
-          <div className={classes["place-item__info"]}>
+          <div className={classes['place-item__info']}>
             <h2>{props.title}</h2>
             <h3>{props.address}</h3>
             <p>{props.description}</p>
           </div>
-          <div className={classes["place-item__actions"]}>
+          <div className={classes['place-item__actions']}>
             <Button inverse onClick={openMapHandler}>
               View on map
             </Button>
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <Button to={`/places/${props.id}`}>Edit</Button>
             )}
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <Button danger onClick={openDeleteModalHandler}>
                 Delete
               </Button>
